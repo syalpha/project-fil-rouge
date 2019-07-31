@@ -21,7 +21,7 @@ class PrestataireController extends AbstractController
     /**
      * @Route("/prestataire", name="prestataire")
      */
-    public function user(Request $request,EntityManagerInterface $entityManagerInterface,UserPasswordEncoderInterface $passwordEncoder)
+    public function addprest(Request $request,EntityManagerInterface $entityManagerInterface,UserPasswordEncoderInterface $passwordEncoder)
     {
         $values= json_decode($request->getContent());
         if (isset($values->usernomentrprise,$values->adresse,$values->ninea,$values->numcompte,$values->telephone, $values->mail,$values->montant));
@@ -45,5 +45,44 @@ class PrestataireController extends AbstractController
             ];
             return new JsonResponse($result, 201);
         }
+        
     }
-}
+
+    /**
+     * @Route("/prestataire/adduser", name="prestataire")
+     */
+
+     public function adduser(Request $request,EntityManagerInterface $entityManagerInterface,UserPasswordEncoderInterface $passwordEncoder)
+    {
+            $values= json_decode($request->getContent());
+            if (isset($values->prenom,$values->nom,$values->username,$values->password,$values->roles,$values->telephone,$values->statut)); 
+            {
+                    $prest= new Prestataire();
+                    $user = new User();
+                    $user->setPrenom($values->prenom);
+                    $user->setNom($values->nom);
+                    $user->setTelephone($values->telephone);
+                    $user->setUsername($values->username);
+                    $user->setStatut("ACTIF");
+                    $user->setPassword($passwordEncoder->encodePassword($user,$values->password));
+                    $user->setRoles(['ROLES_ADMIN']);
+                    $prest=$this->getDoctrine()->getRepository(Prestataire::class)->find($values->prest);
+                    $user->setPrest($prest);
+                    $user->setPrest($prest);
+                    $entityManager = $this->getDoctrine()->getManager();
+                    $entityManager->persist($prest);
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+                    $rep = [
+                        'status' => 201,
+                        'message' => 'on a cree un utilisateur '
+                    ];
+                    return new JsonResponse($rep, 201);        
+                } 
+                $data = [
+                    'status' => 500,
+                    'message' => 'ERROR'
+                ];
+                return new JsonResponse($data, 500);
+            }
+    }
